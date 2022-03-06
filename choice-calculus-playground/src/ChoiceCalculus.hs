@@ -1,4 +1,4 @@
-module ChoiceCalculus (Dim, Tag, Decision, V (Obj, Dim, Chc), atomic, semantics, choiceElimination, tagSelection) where
+module ChoiceCalculus (Dim, Tag, Decision, V (Obj, Dim, Chc), liftV, atomic, semantics, choiceElimination, tagSelection) where
 
 import Data.List (intercalate)
 import Data.Maybe (fromJust, fromMaybe)
@@ -47,6 +47,9 @@ instance Monad V where
   Obj a >>= f = f a
   Dim d t v >>= f = Dim d t (v >>= f)
   Chc d vs >>= f = Chc d (map (>>= f) vs)
+
+liftV :: (a -> V b) -> V a -> V b
+liftV = (=<<)
 
 atomic :: Dim -> [Tag] -> [V a] -> V a
 atomic d ts cs = Dim d ts $ Chc d cs

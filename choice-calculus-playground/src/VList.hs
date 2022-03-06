@@ -17,7 +17,7 @@ module VList
   )
 where
 
-import ChoiceCalculus (Dim, Tag, V (Obj), atomic)
+import ChoiceCalculus (Dim, Tag, V (Obj), atomic, liftV)
 
 type VList a = V (List a)
 
@@ -67,6 +67,3 @@ len (VList vl) = vl >>= len
 
 vlen :: VList a -> V Int
 vlen = liftV len
-  where
-    liftV :: (a -> V b) -> V a -> V b
-    liftV = (=<<)
