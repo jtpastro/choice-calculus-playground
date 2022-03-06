@@ -1,7 +1,6 @@
-{-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
-
 module ChoiceCalculus (Dim, Tag, Decision, V (Obj, Dim, Chc), atomic, semantics, choiceElimination, tagSelection) where
 
+import Data.List (intercalate)
 import Data.Maybe (fromJust, fromMaybe)
 
 type Dim = String
@@ -74,13 +73,13 @@ choiceElimination dim i (Chc dim' vs)
   | dim == dim' = choiceElimination dim i (fromJust (elemAt i vs))
   | otherwise = Chc dim' (map (choiceElimination dim i) vs)
 
-tagSelection :: Tag -> Dim -> V a -> V a
+tagSelection :: Eq a => Tag -> Dim -> V a -> V a
 tagSelection tag dim v = choiceElimination dim (fromJust i) v'
   where
     (tags, v') = fromJust (find dim v)
     i = position tag tags
 
-find :: Dim -> V a -> Maybe ([Tag], V a)
+find :: Eq a => Dim -> V a -> Maybe ([Tag], V a)
 find _ (Obj v) = Nothing
 find dim (Dim dim' tags v)
   | dim == dim' = Just (tags, v)
@@ -92,7 +91,7 @@ find dim (Chc dim' vs) =
         (map (find dim) vs)
     )
 
-derivation :: Decision -> V a -> V a
+derivation :: Eq a => Decision -> V a -> V a
 derivation decision v = foldl (\pv dimTag -> tagSelection (snd dimTag) (fst dimTag) pv) v decision
 
 elemAt :: (Num t, Ord t) => t -> [p] -> Maybe p
