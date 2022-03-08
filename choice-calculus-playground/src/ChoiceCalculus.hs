@@ -1,7 +1,7 @@
 module ChoiceCalculus (Dim, Tag, Decision, V (Obj, Dim, Chc), liftV, atomic, semantics, choiceElimination, tagSelection) where
 
 import Data.List (intercalate)
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromJust, fromMaybe, isNothing)
 
 type Dim = String
 
@@ -13,14 +13,6 @@ data V a
   = Obj a
   | Dim Dim [Tag] (V a)
   | Chc Dim [V a]
-
-instance Eq a => Eq (V a) where
-  (Obj x) == (Obj y) = x == y
-  (Dim d ts v) == (Dim d' ts' v')
-    | d == d' && ts == ts' = v == v'
-  (Chc d vs) == (Chc d' vs')
-    | d == d' = vs == vs'
-  _ == _ = False
 
 instance Show a => Show (V a) where
   show (Obj x) = show x
@@ -90,7 +82,7 @@ find dim (Dim dim' tags v)
 find dim (Chc dim' vs) =
   head
     ( dropWhile
-        (== Nothing)
+        isNothing
         (map (find dim) vs)
     )
 
