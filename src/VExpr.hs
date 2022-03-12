@@ -1,4 +1,4 @@
-module VExpr where
+module VExpr (Expr (Lit, Add, Sub, VExpr), eval, veval) where
 
 import ChoiceCalculus (V (Obj), liftV)
 
