@@ -1,4 +1,4 @@
-module VList
+module Examples.VList
   ( VList,
     List,
     Tagged,
@@ -17,7 +17,7 @@ module VList
   )
 where
 
-import ChoiceCalculus (Dim, Tag, V (Obj), atomic, liftV)
+import CC.ChoiceCalculus (Dim, Tag, V (Obj), atomic, liftV)
 
 type VList a = V (List a)
 

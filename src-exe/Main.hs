@@ -1,7 +1,7 @@
 module Main (main) where
 
-import ChoiceCalculus (V (Chc, Dim, Obj), semantics)
-import VExpr (Expr (Add, Lit, Sub, VExpr), eval)
+import CC.ChoiceCalculus (V (Chc, Dim, Obj), semantics)
+import Examples.VExpr (Expr (Add, Lit, Sub, VExpr), eval)
 
 e1 :: Expr
 e1 = Add (Lit 1) (Lit 2)

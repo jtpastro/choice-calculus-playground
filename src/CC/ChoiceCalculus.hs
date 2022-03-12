@@ -1,4 +1,4 @@
-module ChoiceCalculus (Dim, Tag, Decision, V (Obj, Dim, Chc), liftV, atomic, semantics, choiceElimination, tagSelection) where
+module CC.ChoiceCalculus (Dim, Tag, Decision, V (Obj, Dim, Chc), liftV, atomic, semantics, choiceElimination, tagSelection) where
 
 import Data.List (intercalate)
 import Data.Maybe (fromJust, fromMaybe, isNothing)

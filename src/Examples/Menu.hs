@@ -1,4 +1,4 @@
-module Menu
+module Examples.Menu
   ( Food,
     Menu,
     dessert,
@@ -8,7 +8,7 @@ module Menu
   )
 where
 
-import VList (List, Tagged, VList, alt, opt, vcons, vlist, (<:))
+import Examples.VList (List, Tagged, VList, alt, opt, vcons, vlist, (<:))
 
 data Food = Steak | Pasta | Fries | Cake
 

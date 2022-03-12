@@ -47,9 +47,10 @@ maintainer:         brunomatissek.worm@gmail.com
 library
     -- Modules exported by the library.
     exposed-modules:
-        ChoiceCalculus
-        VExpr
-        VList
+        CC.ChoiceCalculus
+        Examples.VExpr
+        Examples.VList
+        Examples.Menu
 
     -- Modules included in this library but not exported.
     -- other-modules:

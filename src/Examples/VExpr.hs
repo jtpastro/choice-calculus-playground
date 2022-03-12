@@ -1,6 +1,6 @@
-module VExpr (Expr (Lit, Add, Sub, VExpr), eval, veval) where
+module Examples.VExpr (Expr (Lit, Add, Sub, VExpr), eval, veval) where
 
-import ChoiceCalculus (V (Obj), liftV)
+import CC.ChoiceCalculus (V (Obj), liftV)
 
 type VExpr = V Expr
 
