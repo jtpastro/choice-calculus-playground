@@ -1,4 +1,4 @@
-module Main where
+module Main (main) where
 
 import ChoiceCalculus (V (Chc, Dim, Obj), semantics)
 import VExpr (Expr (Add, Lit, Sub, VExpr), eval)
