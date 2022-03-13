@@ -48,6 +48,8 @@ library
     -- Modules exported by the library.
     exposed-modules:
         CC.ChoiceCalculus
+        CC.Edit
+        CC.Zipper
         Examples.VExpr
         Examples.VList
         Examples.Menu
@@ -59,8 +61,10 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.14.3.0
-
+    build-depends:    base          ^>=4.14.3.0
+                    , syb           ^>=0.7.2.1
+                    , syz           ^>=0.2.0.0
+                    , containers    ^>=0.6.5.1
     -- Directories containing source files.
     hs-source-dirs:   src
 

@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 module Examples.Menu
   ( Food,
     Menu,
@@ -9,8 +10,9 @@ module Examples.Menu
 where
 
 import Examples.VList (List, Tagged, VList, alt, opt, vcons, vlist, (<:))
+import Data.Generics (Data)
 
-data Food = Steak | Pasta | Fries | Cake
+data Food = Steak | Pasta | Fries | Cake deriving (Data, Show)
 
 type Menu = VList Food
 

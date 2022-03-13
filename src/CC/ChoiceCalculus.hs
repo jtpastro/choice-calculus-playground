@@ -1,7 +1,10 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module CC.ChoiceCalculus (Dim, Tag, Decision, V (Obj, Dim, Chc), liftV, atomic, semantics, choiceElimination, tagSelection) where
 
 import Data.List (intercalate)
 import Data.Maybe (fromJust, fromMaybe, isNothing)
+import Data.Generics (Data)
 
 type Dim = String
 
@@ -12,7 +15,8 @@ type Decision = [(Dim, Tag)]
 data V a
   = Obj a
   | Dim Dim [Tag] (V a)
-  | Chc Dim [V a]
+  | Chc Dim [V a] 
+  deriving (Data)
 
 instance Show a => Show (V a) where
   show (Obj x) = show x

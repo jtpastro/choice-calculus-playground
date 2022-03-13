@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 module Examples.VList
   ( VList,
     List,
@@ -18,6 +19,7 @@ module Examples.VList
 where
 
 import CC.ChoiceCalculus (Dim, Tag, V (Obj), atomic, liftV)
+import Data.Data
 
 type VList a = V (List a)
 
@@ -25,6 +27,7 @@ data List a
   = Cons a (List a)
   | Empty
   | VList (VList a)
+   deriving (Data, Show)
 
 type Tagged a = (Tag, V a)
 
