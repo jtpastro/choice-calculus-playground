@@ -16,7 +16,7 @@ data V a
   = Obj a
   | Dim Dim [Tag] (V a)
   | Chc Dim [V a] 
-  deriving (Data)
+  deriving (Data, Eq)
 
 instance Show a => Show (V a) where
   show (Obj x) = show x

@@ -1,26 +1,79 @@
-module Examples.VExpr (Expr (Lit, Add, Sub, VExpr), eval, veval) where
+module Examples.VExpr (Expr (Lit, Add, VExpr), eval, veval) where
 
-import CC.ChoiceCalculus (V (Obj), liftV)
+import CC.ChoiceCalculus (V (Chc, Dim, Obj), liftV)
 
 type VExpr = V Expr
 
 data Expr
   = Lit Int
   | Add Expr Expr
-  | Sub Expr Expr
   | VExpr VExpr
+  deriving (Eq)
 
 instance Show Expr where
   show (Lit int) = show int
   show (Add e1 e2) = show e1 <> " + " <> show e2
-  show (Sub e1 e2) = show e1 <> " - " <> show e2
   show (VExpr vexpr) = show vexpr
 
 eval :: Expr -> V Int
 eval (Lit i) = Obj i
 eval (Add e1 e2) = (+) <$> eval e1 <*> eval e2
-eval (Sub e1 e2) = (-) <$> eval e1 <*> eval e2
 eval (VExpr ve) = ve >>= eval
 
 veval :: VExpr -> V Int
 veval = liftV eval
+
+type Cache = [(Expr, V Int)]
+
+updateCache :: (Expr, V Int) -> Cache -> Cache
+updateCache (e', i') [] = [(e', i')]
+updateCache (e', i') ((e, i) : cs) = if e == e' then (e', i') : cs else (e, i) : updateCache (e', i') cs
+
+inCache :: Expr -> Cache -> Maybe (V Int)
+inCache _ [] = Nothing
+inCache e' ((e, i) : cs) = if e == e' then Just i else e' `inCache` cs
+
+type PreOrderLocation = Int
+
+type ParticularEvolution = Expr -> PreOrderLocation -> Expr -> Expr
+
+evolution :: ParticularEvolution
+evolution expI loc nexp = fst (evolAux expI loc nexp)
+
+evolAux :: Expr -> PreOrderLocation -> Expr -> (Expr, Int)
+evolAux expI loc nexp = case (compare loc 0, expI) of
+  (LT, _) -> error $ "Error on search: loc '" <> show loc <> "' is less than zero."
+  (EQ, nexp) -> (nexp, 0)
+  (GT, Lit _) -> error $ "Error on search: loc '" <> show loc <> "' is greater than zero, but there are no more subexpressions to search."
+  (GT, Add left right) ->
+    let (leftWalk, nLoc) = evolAux left (loc -1) nexp
+     in if nLoc == 0
+          then (Add leftWalk right, 0)
+          else
+            let (rightWalk, rnLoc) = evolAux right (nLoc - 1) nexp
+             in (Add left rightWalk, rnLoc)
+  (GT, VExpr (Obj e)) -> let (e', nLoc) = evolAux e loc nexp in (VExpr (Obj e'), nLoc)
+  (GT, VExpr (Dim d t v)) -> let (e', nLoc) = evolAux (VExpr v) loc nexp in (VExpr (Dim d t (Obj e')), nLoc)
+  (GT, VExpr (Chc d [])) -> error $ "Error on search: loc '" <> show loc <> "' is greater than zero, but there are no more subexpressions to search."
+  (GT, VExpr (Chc d (c:cs))) -> let (c', nLoc) = evolAux (VExpr c) (loc-1) nexp in if nLoc == 0
+          then (VExpr (Chc d (Obj c':cs)), 0)
+          else let (c'', nLoc'') = evolAux (VExpr (Chc d cs)) (loc-1) nexp in (VExpr (Chc d (Obj c'':cs)), nLoc'')
+
+
+evalEA :: Expr -> Cache -> ParticularEvolution -> PreOrderLocation -> Expr -> (Expr -> V Int)
+evalEA expI cache evolution loc nexp =
+  let evolvedModel = evolution expI loc nexp
+      analysisLocalChange = eval nexp
+      newCache = updateCache (nexp, analysisLocalChange) cache
+   in eval'' newCache
+
+eval'' :: Cache -> Expr -> V Int
+eval'' c e@(Lit _) = case e `inCache` c of
+  Just i -> i
+  Nothing -> eval e
+eval'' c e@(Add e1 e2) = case e `inCache` c of
+  Just i -> i
+  Nothing -> (+) <$> eval e1 <*> eval e2
+eval'' c e@(VExpr ve) = case e `inCache` c of
+  Just i -> i
+  Nothing -> veval ve

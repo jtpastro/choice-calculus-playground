@@ -1,7 +1,7 @@
 module Main (main) where
 
 import CC.ChoiceCalculus (Dim, V (Chc, Dim, Obj), semantics)
-import Examples.VExpr (Expr (Add, Lit, Sub, VExpr), eval)
+import Examples.VExpr (Expr (Lit, Add, VExpr), eval)
 import CC.Edit (hoist)
 import Examples.Menu (menu, Food)
 import Data.Data (Data)
@@ -27,8 +27,8 @@ e4 =
   VExpr
     ( Dim
         "Op"
-        ["Add1", "Sub2"]
-        (Chc "Op" [Obj (Add e3 (Lit 1)), Obj (Sub e3 (Lit 2))])
+        ["Add1", "Add2"]
+        (Chc "Op" [Obj (Add e3 (Lit 1)), Obj (Add e3 (Lit 2))])
     )
 
 
