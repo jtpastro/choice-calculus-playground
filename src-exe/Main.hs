@@ -1,7 +1,7 @@
 module Main (main) where
 
 import CC.ChoiceCalculus (Dim, V (Chc, Dim, Obj), semantics)
-import Examples.VExpr (Expr (Lit, Add, VExpr), eval)
+import Examples.VExpr (Expr (Lit, Add, VExpr), eval, evalEA, evolution)
 import CC.Edit (hoist)
 import Examples.Menu (menu, Food)
 import Data.Data (Data)
@@ -35,12 +35,4 @@ e4 =
 main :: IO ()
 main = do
   putStrLn "Expressions"
-  print (eval e1)
-  print (eval e2)
-  print (eval e3)
-  print (eval e4)
-  print (semantics (eval e4))
-  putStrLn "Variational Menu"
-  print menu
-  print (hoist "Dessert" menu)
-
+  let e = Add e1 e2 in print $ evalEA (Lit 0) [] 0 e

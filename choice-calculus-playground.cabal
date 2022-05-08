@@ -53,7 +53,6 @@ library
         Examples.VExpr
         Examples.VList
         Examples.Menu
-        Evol.Playground
 
     -- Modules included in this library but not exported.
     -- other-modules:
