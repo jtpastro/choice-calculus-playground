@@ -69,11 +69,16 @@ evolAux expI loc nexp cache = case (compare loc 0, expI) of
 exprLength :: Expr -> Int
 exprLength exp = length $ words $ show exp
 
+veval'' :: Cache -> VExpr -> V Int
+veval'' c = liftV (eval'' c)
+
 eval'' :: Cache -> Expr -> V Int
-eval'' c e@(Lit v) = Data.Maybe.fromMaybe (Obj v) (e `inCache` c)
+eval'' c e@(Lit _) = case e `inCache` c of
+  Just i -> i
+  Nothing -> eval e
 eval'' c e@(Add e1 e2) = case e `inCache` c of
   Just i -> i
-  Nothing -> (+) <$> eval e1 <*> eval e2
+  Nothing -> (+) <$> eval'' c e1 <*> eval'' c e2
 eval'' c e@(VExpr ve) = case e `inCache` c of
   Just i -> i
-  Nothing -> veval ve
+  Nothing -> veval'' c ve 

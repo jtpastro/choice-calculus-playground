@@ -41,3 +41,4 @@ main = do
   let (e6,cache, result) = evolution (Lit 0) [] 0 e5
   print cache
   print $ evolution e5 cache 6 e2
+  let e = Add e1 e2 in print $ evolution (Lit 0) [] 0 e
