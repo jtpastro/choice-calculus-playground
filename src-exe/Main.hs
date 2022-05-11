@@ -1,11 +1,12 @@
 module Main (main) where
 
 import CC.ChoiceCalculus (Dim, V (Chc, Dim, Obj), semantics)
-import Examples.VExpr (Expr (Lit, Add, VExpr), eval, evalEA, evolution)
+import Examples.VExpr (Expr (Lit, Add, VExpr), eval, evolution)
 import CC.Edit (hoist)
 import Examples.Menu (menu, Food)
 import Data.Data (Data)
 import qualified Examples.VList
+import Data.List (sort)
 
 e1 :: Expr
 e1 = Add (Lit 1) (Lit 2)
@@ -31,8 +32,12 @@ e4 =
         (Chc "Op" [Obj (Add e3 (Lit 1)), Obj (Add e3 (Lit 2))])
     )
 
+e5 = Add (Add (Lit 3) (Add (Lit 2) (Lit 3))) (Add (Lit 2) (Lit 1)) 
 
 main :: IO ()
 main = do
   putStrLn "Expressions"
-  let e = Add e1 e2 in print $ evalEA (Lit 0) [] 0 e4
+--  let e = Add e1 e2 in i
+  let (e6,cache, result) = evolution (Lit 0) [] 0 e5
+  print cache
+  print $ evolution e5 cache 6 e2

@@ -1,6 +1,8 @@
-module Examples.VExpr (Expr (Lit, Add, VExpr), eval, veval, evalEA, evolution) where
+module Examples.VExpr (Expr (Lit, Add, VExpr), eval, veval, evolution) where
 
 import CC.ChoiceCalculus (V (Chc, Dim, Obj), liftV)
+import qualified Data.Maybe
+import Data.List ((\\))
 
 type VExpr = V Expr
 
@@ -35,41 +37,40 @@ inCache e' ((e, i) : cs) = if e == e' then Just i else e' `inCache` cs
 
 type PreOrderLocation = Int
 
-type ParticularEvolution = Expr -> PreOrderLocation -> Expr -> Expr
+type ParticularEvolution = Expr -> Cache -> PreOrderLocation -> Expr -> (Expr, Cache, V Int)
 
 evolution :: ParticularEvolution
-evolution expI loc nexp = fst (evolAux expI loc nexp)
+evolution expI cache loc nexp = let (e,_,c) = evolAux expI loc nexp cache
+                                in (e,c, snd $ last c)
 
-evolAux :: Expr -> PreOrderLocation -> Expr -> (Expr, Int)
-evolAux expI loc nexp = case (compare loc 0, expI) of
+evolAux :: Expr -> PreOrderLocation -> Expr -> Cache -> (Expr, Int, Cache)
+evolAux expI loc nexp cache = case (compare loc 0, expI) of
   (LT, _) -> error $ "Error on search: loc '" <> show loc <> "' is less than zero."
-  (EQ, _) -> (nexp, 0)
-  (GT, Lit _) -> error $ "Error on search: loc '" <> show loc <> "' is greater than zero, but there are no more subexpressions to search."
+  (EQ, _) -> let (_, _, ncache)  = evolAux nexp (exprLength nexp) (Lit 0) cache in (nexp, 0, ncache )
+  (GT, l@(Lit v)) -> (l, loc, cache)
   (GT, Add left right) ->
-    let (leftWalk, nLoc) = evolAux left (loc -1) nexp
+    let (leftWalk, nLoc, cache') = evolAux left (loc -1) nexp cache
      in if nLoc == 0
-          then (Add leftWalk right, 0)
+          then let newNode = Add leftWalk right
+                   newCacheEntry = (newNode, eval'' cache' newNode)
+               in (newNode, 0, updateCache newCacheEntry cache')
           else
-            let (rightWalk, rnLoc) = evolAux right (nLoc - 1) nexp
-             in (Add left rightWalk, rnLoc)
-  (GT, VExpr (Obj e)) -> let (e', nLoc) = evolAux e loc nexp in (VExpr (Obj e'), nLoc)
-  (GT, VExpr (Dim d t v)) -> let (e', nLoc) = evolAux (VExpr v) loc nexp in (VExpr (Dim d t (Obj e')), nLoc)
+            let (rightWalk, rnLoc, cache'') = evolAux right (nLoc - 1) nexp cache'
+                newNode = Add left rightWalk 
+                newCacheEntry = (newNode, eval'' cache'' newNode)
+            in (newNode, rnLoc, updateCache newCacheEntry cache'')
+  (GT, VExpr (Obj e)) -> let (e', nLoc, cache) = evolAux e loc nexp cache in (VExpr (Obj e'), nLoc, cache)
+  (GT, VExpr (Dim d t v)) -> let (e', nLoc, cache) = evolAux (VExpr v) loc nexp cache in (VExpr (Dim d t (Obj e')), nLoc, cache)
   (GT, VExpr (Chc d [])) -> error $ "Error on search: loc '" <> show loc <> "' is greater than zero, but there are no more subexpressions to search."
-  (GT, VExpr (Chc d (c:cs))) -> let (c', nLoc) = evolAux (VExpr c) (loc-1) nexp in if nLoc == 0
-          then (VExpr (Chc d (Obj c':cs)), 0)
-          else let (c'', nLoc'') = evolAux (VExpr (Chc d cs)) (loc-1) nexp in (VExpr (Chc d (Obj c'':cs)), nLoc'')
+  (GT, VExpr (Chc d (c:cs))) -> let (c', nLoc, cache) = evolAux (VExpr c) (loc-1) nexp cache in if nLoc == 0
+          then (VExpr (Chc d (Obj c':cs)), 0, cache)
+          else let (c'', nLoc'', cache) = evolAux (VExpr (Chc d cs)) (loc-1) nexp cache in (VExpr (Chc d (Obj c'':cs)), nLoc'', cache)
 
-evalEA :: Expr -> Cache -> PreOrderLocation -> Expr -> (Cache, Expr, V Int)
-evalEA expI cache loc nexp =
-  let evolvedModel = evolution expI loc nexp
-      analysisLocalChange = eval'' cache nexp
-      newCache = updateCache (nexp, analysisLocalChange) cache
-   in (newCache, evolvedModel, eval'' newCache evolvedModel)
+exprLength :: Expr -> Int
+exprLength exp = length $ words $ show exp
 
 eval'' :: Cache -> Expr -> V Int
-eval'' c e@(Lit _) = case e `inCache` c of
-  Just i -> i
-  Nothing -> eval e
+eval'' c e@(Lit v) = Data.Maybe.fromMaybe (Obj v) (e `inCache` c)
 eval'' c e@(Add e1 e2) = case e `inCache` c of
   Just i -> i
   Nothing -> (+) <$> eval e1 <*> eval e2
